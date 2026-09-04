@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masterclass: Fundamentos JS e Funções</title>
+    <style>
+        :root {
+            --primary: #00264d; /* Azul Escuro */
+            --secondary: #0056b3; /* Azul Médio */
+            --accent: #e6f2ff; /* Azul Muito Claro */
+            --text: #333;
+            --white: #ffffff;
+            --code-bg: #1e1e1e;
+            --practice-bg: #f0f7ff;
+            --practice-border: #0056b3;
+            --hl-keyword: #ff79c6; /* Rosa para keywords JS */
+            --hl-string: #f1fa8c; /* Amarelo para strings */
+            --hl-comment: #6272a4; /* Cinza para comentários */
+            --hl-builtin: #8be9fd; /* Ciano para built-ins */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--primary);
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            padding: 60px 100px;
+            box-sizing: border-box;
+            animation: fadeIn 0.5s ease-out;
+            overflow-y: auto;
+        }
+
+        .slide.active { 
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        h1 { font-size: 3.2rem; color: var(--primary); margin-bottom: 20px; border-left: 20px solid var(--secondary); padding-left: 25px; line-height: 1.1; }
+        h2 { font-size: 2.4rem; color: var(--secondary); margin-top: 15px; }
+        p, li { font-size: 1.6rem; line-height: 1.5; color: var(--text); }
+        ul { margin-top: 10px; }
+        li { margin-bottom: 10px; }
+        
+        pre { 
+            background: var(--code-bg); 
+            color: #f8f8f2; /* Default text color in dark code */
+            padding: 25px; 
+            border-radius: 12px; 
+            font-size: 1.3rem;
+            margin: 20px 0;
+            border-left: 10px solid var(--secondary);
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+        }
+
+        /* Syntax Highlighting Simples */
+        .kd { color: var(--hl-keyword); } /* keyword/declaration */
+        .s { color: var(--hl-string); }   /* string */
+        .c { color: var(--hl-comment); }  /* comment */
+        .bi { color: var(--hl-builtin); } /* builtin */
+
+        .practice-box {
+            background: var(--practice-bg);
+            border-left: 8px solid var(--practice-border);
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .practice-box b { color: var(--secondary); text-transform: uppercase; font-size: 1.1rem; display: block; margin-bottom: 8px; }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 12px 28px;
+            background: var(--primary);
+            color: white;
+            border: 2px solid var(--white);
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover { background: var(--secondary); transform: translateY(-2px); }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 8px;
+            background: var(--secondary);
+            transition: width 0.3s ease;
+            z-index: 101;
+        }
+
+        .slide-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            color: var(--primary);
+            background: var(--accent);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+<div class="slide-container" id="container"></div>
+<div class="slide-counter" id="counter">1 / 47</div>
+
+<div class="controls">
+    <button onclick="prev()">⬅ Anterior</button>
+    <button onclick="next()">Próximo ➡</button>
+</div>
+
+<script>
+    const slidesData = [
+        { t: "Fundamentos JS e Funções", c: "<h2>O Motor da Web Moderna</h2><p>Nesta aula, lançaremos as bases da lógica de programação em JavaScript. Vamos entender como armazenar dados, manipulá-los e, crucialmente, como encapsular lógica reutilizável através de funções para criar a nossa primeira biblioteca utilitária: <code>utils.js</code>.</p>" },
+        { t: "O que é JavaScript hoje?", c: "<p>É uma linguagem de programação de alto nível, interpretada (ou compilada JIT), prototipada e multiparadigma. É a linguagem nativa dos navegadores e, com Node.js, domina também o back-end.</p>" },
+        { t: "Variáveis: Onde tudo começa", c: "<p>Variáveis são 'caixas' ou contêineres rotulados para armazenar dados na memória do computador. No JS moderno, temos formas específicas de declarar essas caixas dependendo de como vamos usar o dado.</p>" },
+        { t: "A Evolução: var vs let vs const", c: "<ul><li><b>var:</b> A forma antiga. Possui escopo de função e comportamento imprevisível (hoisting). Evite no JS moderno.</li><li><b>let:</b> Introduzido no ES6. Possui escopo de bloco e pode ter seu valor reatribuído.</li><li><b>const:</b> Também do ES6. Possui escopo de bloco, mas seu valor <b>não</b> pode ser reatribuído após a inicialização.</li></ul>" },
+        { t: "Uso Prático: Escopo de Bloco", c: "<p>O escopo de bloco (<code>let</code>/<code>const</code>) impede que variáveis 'vazem' de dentro de estruturas como <code>if</code> ou <code>for</code>.</p><pre><span class='kd'>if</span> (true) {\n  <span class='kd'>let</span> local = <span class='s'>'visível apenas aqui'</span>;\n  <span class='kd'>var</span> global = <span class='s'>'vaza para fora'</span>;\n}\n<span class='c'>// console.log(local); // Erro</span>\nconsole.log(global); <span class='c'>// Funciona</span></pre>" },
+        { t: "A Regra de Ouro: const por padrão", c: "<p>Sempre use <code>const</code> para declarar variáveis. Se você descobrir depois que precisa mudar o valor dela (como em um contador), altere para <code>let</code>. Isso previne bugs acidentais de reatribuição.</p>" },
+        { t: "Tipos de Dados Dinâmicos", c: "<p>O JavaScript é fracamente tipado e dinâmico. Você não precisa declarar o tipo, e uma variável pode mudar de tipo durante a execução.</p><pre><span class='kd'>let</span> dado = <span class='s'>'Olá'</span>; <span class='c'>// tipo String</span>\ndado = <span class='s'>42</span>;      <span class='c'>// agora é Number</span></pre>" },
+        { t: "Tipos Primitivos I: String e Number", c: "<ul><li><b>String:</b> Sequência de caracteres. Usamos aspas simples (' '), duplas (\" \") ou crases (``) para Template Strings.</li><li><b>Number:</b> Inclui inteiros e números de ponto flutuante (decimais). O JS não faz distinção.</li></ul>" },
+        { t: "Template Strings (Crases)", c: "<p>A forma moderna e poderosa de trabalhar com texto, permitindo quebra de linha e interpolação de variáveis.</p><pre><span class='kd'>const</span> nome = <span class='s'>'Maria'</span>;\n<span class='kd'>const</span> msg = <span class='s'>`Olá, ${nome}. \nBem-vinda!`</span>;</pre>" },
+        { t: "Tipos Primitivos II: Boolean e Null/Undefined", c: "<ul><li><b>Boolean:</b> Apenas dois valores: <code>true</code> (verdadeiro) ou <code>false</code> (falso). Base para lógica de decisão.</li><li><b>Undefined:</b> Valor padrão de uma variável declarada mas não inicializada.</li><li><b>Null:</b> Representa a ausência intencional de qualquer valor de objeto.</li></ul>" },
+        { t: "Atividade I: Pesquisa e Curiosidade", c: "<h2>Trabalho em Grupo (3 Pessoas)</h2><p>Pesquisem na documentação MDN (Mozilla Developer Network) e respondam:</p><ul><li>O que acontece se você usar o operador <code>typeof</code> em um valor <code>null</code>? Por que isso acontece?</li><li>Quais são os 7 tipos primitivos do JavaScript no ES6+?</li><li>Qual a diferença prática entre <code>==</code> (igualdade ampla) e <code>===</code> (igualdade estrita)?</li></ul>" },
+        { t: "Operadores Aritméticos", c: "<p>Símbolos para realizar cálculos matemáticos padrão.</p><p><code>+</code> (adição/concatenação), <code>-</code> (subtração), <code>*</code> (multiplicação), <code>/</code> (divisão), <code>%</code> (módulo/resto), <code>**</code> (exponenciação).</p><div class='practice-box'><b>Uso Prático:</b> O operador <code>%</code> (módulo) é essencial para descobrir se um número é par (<code>n % 2 === 0</code>).</div>" },
+        { t: "Operadores de Atribuição", c: "<p>Formas curtas de atualizar o valor de uma variável baseada em seu valor anterior.</p><pre><span class='kd'>let</span> x = <span class='s'>10</span>;\nx += <span class='s'>5</span>; <span class='c'>// x = x + 5 (resultado: 15)</span>\nx *= <span class='s'>2</span>; <span class='c'>// x = x * 2 (resultado: 30)</span></pre>" },
+        { t: "Operadores de Comparação", c: "<p>Usados em estruturas condicionais para retornar um Booleano.</p><p><code>===</code> (igual estrito), <code>!==</code> (diferente estrito), <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>.</p><div class='practice-box'><b>Aviso:</b> Sempre prefira <code>===</code> e <code>!==</code> para evitar coerção de tipo indesejada (ex: <code>'5' == 5</code> é true, mas <code>'5' === 5</code> é false).</div>" },
+        { t: "Operadores Lógicos", c: "<p>Permitem combinar múltiplas comparações.</p><ul><li><b>&amp;&amp; (E):</b> Retorna true se AMBOS forem verdadeiros.</li><li><b>|| (OU):</b> Retorna true se PELO MENOS UM for verdadeiro.</li><li><b>! (NÃO):</b> Inverte o valor booleano.</li></ul>" },
+        { t: "Uso Prático: Lógica Combinada", c: "<pre><span class='kd'>const</span> idade = <span class='s'>20</span>;\n<span class='kd'>const</span> temCnh = true;\n<span class='kd'>const</span> podeDirigir = idade >= <span class='s'>18</span> &amp;&amp; temCnh;\n<span class='c'>// resultado: true</span></pre>" },
+        
+        // SLIDES NOVOS ADICIONADOS A PARTIR DAQUI
+        { t: "Controle de Fluxo: if e else", c: "<p>A estrutura <code>if...else</code> permite que o código tome decisões com base em condições lógicas avaliadas como Booleanas.</p><pre><span class='kd'>const</span> hora = <span class='s'>14</span>;\n\n<span class='kd'>if</span> (hora &lt; <span class='s'>12</span>) {\n  console.log(<span class='s'>'Bom dia!'</span>);\n} <span class='kd'>else</span> {\n  console.log(<span class='s'>'Boa tarde ou noite!'</span>);\n}</pre><div class='practice-box'><b>Uso Prático:</b> É o mecanismo básico de bifurcação de caminhos no seu software.</div>" },
+        { t: "Condições Múltiplas: else if", c: "<p>Quando temos mais de duas possibilidades, podemos encadear os testes para cobrir cenários progressivos.</p><pre><span class='kd'>const</span> nota = <span class='s'>85</span>;\n\n<span class='kd'>if</span> (nota &gt;= <span class='s'>90</span>) {\n  console.log(<span class='s'>'Conceito A'</span>);\n} <span class='kd'>else if</span> (nota &gt;= <span class='s'>80</span>) {\n  console.log(<span class='s'>'Conceito B'</span>);\n} <span class='kd'>else</span> {\n  console.log(<span class='s'>'Precisa melhorar'</span>);\n}</pre><div class='practice-box'><b>Dica:</b> A ordem importa! O JavaScript avalia de cima para baixo e executa <b>apenas o primeiro</b> bloco verdadeiro.</div>" },
+        { t: "Operador Ternário", c: "<p>Uma forma concisa (short-hand) de escrever um <code>if...else</code> em uma única linha. É indispensável no desenvolvimento moderno.</p><pre><span class='c'>// Sintaxe: condicao ? retorno_se_verdadeiro : retorno_se_falso</span>\n\n<span class='kd'>const</span> idade = <span class='s'>20</span>;\n<span class='kd'>const</span> status = idade &gt;= <span class='s'>18</span> ? <span class='s'>'Maior de idade'</span> : <span class='s'>'Menor de idade'</span>;\n\nconsole.log(status); <span class='c'>// Imprime: 'Maior de idade'</span></pre>" },
+        { t: "Laços de Repetição (Loops)", c: "<p>Loops servem para executar o mesmo bloco de código repetidas vezes até que uma condição de parada seja alcançada. Isso evita a repetição manual do código e automatiza fluxos (conceito DRY - Don't Repeat Yourself).</p><ul><li><b>for:</b> Excelente para quando você <b>sabe</b> a quantidade exata de vezes que precisa repetir.</li><li><b>while:</b> Excelente para quando o número de repetições é <b>incerto</b>, dependendo apenas de uma condição.</li></ul>" },
+        { t: "O Clássico: Laço for", c: "<p>O laço for tradicional possui 3 parâmetros definidos: a inicialização, a condição de parada, e a taxa de incremento.</p><pre><span class='c'>// for (inicializacao; condicao; incremento)</span>\n<span class='kd'>for</span> (<span class='kd'>let</span> i = <span class='s'>0</span>; i &lt; <span class='s'>5</span>; i++) {\n  console.log(<span class='s'>`Contador: ${i}`</span>);\n}</pre><div class='practice-box'><b>Aviso:</b> Note o uso do <code>let</code> para inicializar o controle <code>i</code>, pois seu valor precisa ser constantemente reatribuído (i++) a cada nova volta no loop.</div>" },
+        { t: "O Flexível: Laço while", c: "<p>O <code>while</code> avalia uma condição, executando o bloco sempre que ela for <code>true</code>. Devemos garantir que o controle de estado avance para o final para não travarmos o código.</p><pre><span class='kd'>let</span> energia = <span class='s'>100</span>;\n\n<span class='kd'>while</span> (energia &gt; <span class='s'>0</span>) {\n  console.log(<span class='s'>'Jogando...'</span>);\n  energia -= <span class='s'>20</span>; <span class='c'>// Consome a energia até virar 0</span>\n}\nconsole.log(<span class='s'>'Fim de jogo!'</span>);</pre>" },
+        { t: "A Forma Moderna: for...of", c: "<p>Introduzido no ES6, é a maneira mais elegante e segura de iterar sobre <b>estruturas de dados</b> como arrays e strings (valores iteráveis).</p><pre><span class='kd'>const</span> frutas = [<span class='s'>'Maçã'</span>, <span class='s'>'Banana'</span>, <span class='s'>'Uva'</span>];\n\n<span class='kd'>for</span> (<span class='kd'>const</span> fruta <span class='kd'>of</span> frutas) {\n  console.log(fruta);\n}</pre><div class='practice-box'><b>Por que é melhor?</b> Evita erros clássicos de esquecer o controle numérico ou errar o índice. Podemos usar <code>const</code> pois uma nova variável independente é criada a cada loop!</div>" },
+        // FIM DOS SLIDES NOVOS
+        
+        { t: "Introdução às Funções", c: "<p>Funções são blocos de código 'empacotados' projetados para executar uma tarefa específica. Elas são os blocos de construção fundamentais da reutilização de código.</p>" },
+        { t: "Anatomia de uma Função (Declaração)", c: "<pre><span class='kd'>function</span> <span class='bi'>nomeDaFuncao</span>(parametro1, parametro2) {\n  <span class='c'>// Corpo da função (lógica)</span>\n  <span class='kd'>return</span> resultado; <span class='c'>// opcional</span>\n}</pre>" },
+        { t: "Parâmetros e Argumentos", c: "<ul><li><b>Parâmetros:</b> Os nomes listados na definição da função (as variáveis locais).</li><li><b>Argumentos:</b> Os valores reais passados para a função quando ela é chamada (invocada).</li></ul>" },
+        { t: "A Importância do 'return'", c: "<p>A palavra-chave <code>return</code> finaliza a execução da função e envia um valor de volta para quem a chamou. Sem <code>return</code>, a função executa a lógica mas retorna <code>undefined</code>.</p>" },
+        { t: "Expressões de Função", c: "<p>Em JS, funções são 'cidadãos de primeira classe'. Podem ser armazenadas em variáveis.</p><pre><span class='kd'>const</span> <span class='bi'>subtrair</span> = <span class='kd'>function</span>(a, b) {\n  <span class='kd'>return</span> a - b;\n};</pre>" },
+        { t: "Arrow Functions (Seta)", c: "<p>A sintaxe moderna e curta introduzida no ES6. Muito usada em callbacks.</p><pre><span class='kd'>const</span> <span class='bi'>multiplicar</span> = (a, b) => {\n  <span class='kd'>return</span> a * b;\n};</pre>" },
+        { t: "Arrow Functions: Retorno Implícito", c: "<p>Se a função tiver apenas uma linha de lógica que retorna algo, podemos remover as chaves e o <code>return</code>.</p><pre><span class='kd'>const</span> <span class='bi'>dobro</span> = n => n * <span class='s'>2</span>;</pre><div class='practice-box'><b>Uso Prático:</b> Ideal para funções matematicas simples ou manipulação rápida de dados.</div>" },
+        { t: "Atividade II: Criando Pequenas Lógicas", c: "<h2>Prática Individual</h2><p>Escreva no papel ou editor de texto 3 funções usando a sintaxe de Arrow Function com retorno implícito:</p><ul><li><code>isAdulto(idade)</code>: Retorna true se idade >= 18.</li><li><code>getAreaQuadrado(lado)</code>: Retorna a área.</li><li><code>formatarReal(valor)</code>: Recebe um número e retorna uma string formatada (ex: Recebe 5, retorna 'R$ 5.00'). <i>Dica: use .toFixed(2)</i></li></ul>" },
+        { t: "Escopo de Função", c: "<p>Variáveis definidas <b>dentro</b> de uma função não podem ser acessadas de fora dela.</p><pre><span class='kd'>function</span> <span class='bi'>teste</span>() {\n  <span class='kd'>const</span> interna = <span class='s'>'segredo'</span>;\n}\nconsole.log(interna); <span class='c'>// Erro: interna is not defined</span></pre>" },
+        { t: "Escopo Global", c: "<p>Variáveis definidas fora de qualquer função ou bloco são globais e podem ser acessadas e modificadas por qualquer parte do script. Evite poluir o escopo global.</p>" },
+        { t: "Introdução às Funções Utilitárias", c: "<p>Uma função utilitária (utility function) é uma função projetada para realizar uma tarefa comum, genérica e repetitiva em um projeto. Elas não pertencem à lógica de negócio específica, mas ajudam a construí-la.</p>" },
+        { t: "Por que criar uma utils.js?", c: "<ul><li><b>DRY (Don't Repeat Yourself):</b> Evita copiar e colar a mesma lógica (ex: formatação de data) em vários arquivos.</li><li><b>Manutenibilidade:</b> Se a lógica de formatação mudar, você muda em apenas um lugar.</li><li><b>Organização:</b> Mantém o código principal limpo e focado.</li></ul>" },
+        { t: "Exemplo Util: Mascarar E-mail", c: "<p>Uma função que pega 'contato@email.com' e transforma em 'con***@email.com'.</p><div class='practice-box'><b>Aplicação:</b> Segurança e privacidade ao exibir dados parciais do usuário na interface.</div>" },
+        { t: "Exemplo Util: Gerar ID Único", c: "<pre><span class='kd'>const</span> <span class='bi'>gerarId</span> = () => {\n  <span class='kd'>return</span> <span class='s'>`id_${Date.now()}_${Math.random()}`</span>;\n};</pre><div class='practice-box'><b>Aplicação:</b> Essencial para criar novos itens em uma lista dinamicamente e garantir que cada um tenha uma referência única.</div>" },
+        { t: "Exemplo Util: Capitalizar Texto", c: "<p>Transformar 'joão silva' em 'João Silva'. O JS não tem uma função nativa simples para isso.</p>" },
+        { t: "Callbacks: Introdução", c: "<p>Um callback é uma função passada como argumento para <b>outra</b> função, para ser executada mais tarde.</p><pre><span class='bi'>setTimeout</span>(() => {\n  console.log(<span class='s'>'Passou 1 segundo'</span>);\n}, <span class='s'>1000</span>);</pre>" },
+        { t: "setTimeout e setInterval", c: "<ul><li><b>setTimeout:</b> Executa a função callback UMA vez após um delay.</li><li><b>setInterval:</b> Executa a função callback repetidamente a cada intervalo de tempo.</li></ul>" },
+        { t: "Parâmetros Padrão (Default)", c: "<p>No ES6+, você pode definir valores padrão para parâmetros caso nenhum argumento seja passado.</p><pre><span class='kd'>function</span> <span class='bi'>saudacao</span>(nome = <span class='s'>'Visitante'</span>) {\n  console.log(<span class='s'>`Olá, ${nome}`</span>);\n}</pre>" },
+        { t: "Boas Práticas em Funções", c: "<ul><li>Nomeie funções com verbos (ex: <code>calcularTotal</code>, não <code>total</code>).</li><li>Uma função deve fazer APENAS UMA coisa (Princípio da Responsabilidade Única).</li><li>Mantenha as funções curtas e legíveis.</li><li>Use Arrow Functions para funções anônimas e callbacks.</li></ul>" },
+        { t: "O Conceito de Módulo (Prévia)", c: "<p>Para usar o <code>utils.js</code> em outros arquivos, precisaremos exportar as funções dele e importá-las onde for necessário. No navegador moderno, usamos <code>export/import</code>.</p>" },
+        { t: "export e import (Sintaxe)", c: "<pre><span class='c'>// No utils.js</span>\n<span class='kd'>export const</span> <span class='bi'>dobro</span> = n => n * <span class='s'>2</span>;\n\n<span class='c'>// No main.js</span>\n<span class='kd'>import</span> { dobro } <span class='kd'>from</span> <span class='s'>'./utils.js'</span>;</pre>" },
+        { t: "Atividade III: Implementando a utils.js", c: "<h2>Desafio Prático Final</h2><p>Vamos criar a base da nossa biblioteca utilitária do projeto. Crie um arquivo <code>utils.js</code> e implemente (e exporte) as seguintes funções:</p><ul><li><b>formatarMoeda(valor):</b> Recebe um número, retorna string 'R$ X,XX' (use .toFixed(2) e troque '.' por ',').</li><li><b>validarEmail(email):</b> Recebe string, retorna true se tiver '@' e '.' (use .includes()).</li><li><b>obterDataFormatada():</b> Retorna a data atual no formato 'DD/MM/AAAA' (use objeto Date).</li></ul>" },
+        { t: "Checklist de Entrega", c: "<ul><li>O arquivo utils.js foi criado?</li><li>As 3 funções foram implementadas corretamente?</li><li>As funções estão usando <code>const</code>/<code>let</code> corretamente e sintaxe moderna (Arrow Functions onde couber)?</li><li>Todas as funções foram exportadas usando <code>export</code>?</li></ul>" },
+        { t: "Conclusão", c: "<h2>Base Sólida, Futuro Promissor</h2><p>Dominar variáveis, tipos e funções é o passo mais importante no desenvolvimento web. Com a <code>utils.js</code>, você começa a pensar como um engenheiro de software: criando ferramentas reutilizáveis e organizadas.</p>" }
+    ];
+
+    let current = 0;
+    const container = document.getElementById('container');
+    const counterDisplay = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+
+    function render() {
+        container.innerHTML = '';
+        slidesData.forEach((s, i) => {
+            const div = document.createElement('div');
+            div.className = `slide ${i === current ? 'active' : ''}`;
+            // Adiciona título apenas se definido
+            const titleHtml = s.t ? `<h1>${s.t}</h1>` : '';
+            div.innerHTML = `${titleHtml}${s.c}`;
+            container.appendChild(div);
+        });
+        counterDisplay.innerText = `${current + 1} / ${slidesData.length}`;
+        progress.style.width = `${((current + 1) / slidesData.length) * 100}%`;
+    }
+
+    function next() { if(current < slidesData.length - 1) { current++; render(); } }
+    function prev() { if(current > 0) { current--; render(); } }
+
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'ArrowRight' || e.key === ' ') next();
+        if(e.key === 'ArrowLeft') prev();
+    });
+
+    render();
+</script>
+</body>
+</html>
