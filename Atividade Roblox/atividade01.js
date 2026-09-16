@@ -1,177 +1,133 @@
-// lê o que o usuário digita no terminal
-const readline = require('readline');
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+const prompt = require(`prompt-sync`)()
 
-// pergunta algo e espera a resposta
-function perguntar(pergunta) {
-  return new Promise((resolve) => rl.question(pergunta, resolve));
-}
+let nomeItem = [`Espada das Sombras`, `Asas Douradas`, `Capacete Neon`, `Pet Dragão`, `Skin Cyberpunk`]
+let precoItem = [99, 325, 400, 600, 700]
+let estoqueItem = [10, 7, 6, 4, 1]
+let id = [1, 2, 3, 4, 5]
+const finalVetor = 100
 
-// desenha uma caixa com borda no terminal
-function caixa(linhas) {
-  const largura = Math.max(...linhas.map((l) => l.length)) + 2;
-  console.log('╔' + '═'.repeat(largura) + '╗');
-  linhas.forEach((linha) => {
-    console.log('║ ' + linha.padEnd(largura - 1) + '║');
-  });
-  console.log('╚' + '═'.repeat(largura) + '╝');
-}
-
-// variáveis da ficha do item (Etapa 1)
-const nomeItem = 'Espada das Sombras';
-const precoItem = 250;
-const raridadeItem = 'Raro';
-const quantidadeEstoque = 12;
-
-// lista de itens do jogo
-const catalogo = [
-  { nome: 'Espada das Sombras', preco: 250, quantidadeEstoque: 12 },
-  { nome: 'Asas Douradas', preco: 480, quantidadeEstoque: 8 },
-  { nome: 'Capacete Neon', preco: 90, quantidadeEstoque: 20 },
-  { nome: 'Pet Dragão', preco: 600, quantidadeEstoque: 3 },
-  { nome: 'Skin Cyberpunk', preco: 150, quantidadeEstoque: 15 },
-];
-
-async function main() {
-  await menuPrincipal();
-}
-
-// Etapa 5 + menu interativo
-async function menuPrincipal() {
-  let continuar = true;
-
-  while (continuar) {
-    caixa([
-      'SISTEMA DE CADASTRO DE ITENS',
-      '1 - Incluir item',
-      '2 - Excluir item',
-      '3 - Comprar item',
-      '4 - Sair',
-    ]);
-
-    const opcao = await perguntar('Escolha uma opção: ');
-
-    if (opcao === '1') {
-      await incluirItem();
-    } else if (opcao === '2') {
-      await excluirItem();
-    } else if (opcao === '3') {
-      await comprarItem();
-    } else if (opcao === '4') {
-      continuar = false;
-    } else {
-      console.log('Opção inválida.');
+function raridades(preco) {
+    if (preco >= 400) {
+        return `Lendário`
     }
-  }
-
-  rl.close();
+    else if (preco >= 150) {
+        return `Raro`
+    }
+    else {
+        return `Comum`
+    }
 }
 
-// adiciona um item novo
-async function incluirItem() {
-  const nome = await perguntar('Nome do item: ');
-  const preco = Number(await perguntar('Preço do item: '));
+function registrar() {
+    console.clear()
 
-  if (preco < 0) {
-    console.log('Erro: o preço do item não pode ser negativo.');
-    return;
-  }
+    let i = 0
+    let posicao = -1
 
-  const raridade = await perguntar('Raridade do item (Comum, Raro ou Lendário): ');
-  const raridadesValidas = ['Comum', 'Raro', 'Lendário'];
+    for (i = 0; i < finalVetor; i++) {
+        if (nomeItem[i] === undefined && posicao === -1) {
+            posicao = i
+        }
+    }
 
-  if (!raridadesValidas.includes(raridade)) {
-    console.log('Erro: raridade inválida. Use Comum, Raro ou Lendário.');
-    return;
-  }
+    console.log(`+------------------------------+`)
+    console.log(`| REGISTRAR ITEM |`)
+    console.log(`+------------------------------+`)
 
-  const estoque = Number(await perguntar('Quantidade em estoque: '));
-  const emDestaque = preco > 500 ? true : false;
-  const disponivelParaCompra = estoque > 0 && preco > 0;
+    nomeItem[posicao] = prompt(`Nome do item: `)
+    precoItem[posicao] = Number(prompt(`Preço do item: `))
+    estoqueItem[posicao] = Number(prompt(`Quantidade em estoque: `))
+    id[posicao] = posicao + 1
 
-  catalogo.push({ nome, preco, quantidadeEstoque: estoque, raridade });
-
-  caixa([
-    'ITEM INCLUÍDO',
-    `Nome: ${nome}`,
-    `Preço: R$ ${preco}`,
-    `Raridade: ${raridade}`,
-    `Estoque: ${estoque} unidades`,
-    `Em destaque: ${emDestaque}`,
-    `Disponível para compra: ${disponivelParaCompra}`,
-  ]);
+    console.log(`Item cadastrado com sucesso!`)
+    prompt(`ENTER para voltar: `)
 }
 
-// remove um item da lista
-async function excluirItem() {
-  if (catalogo.length === 0) {
-    console.log('Não há itens cadastrados.');
-    return;
-  }
+function comprar() {
+    console.clear()
 
-  caixa(['ITENS CADASTRADOS', ...catalogo.map((item, i) => `${i + 1} - ${item.nome}`)]);
+    console.log(`+------------------------------+`)
+    console.log(`| CATÁLOGO |`)
+    console.log(`+------------------------------+`)
 
-  const numero = Number(await perguntar('Número do item para excluir: '));
-  const indice = numero - 1;
+    let i = 0
+    for (i = 0; i < finalVetor; i++) {
+        if (nomeItem[i] === undefined) {
+            continue
+        }
+        console.log(`ID ${id[i]} - ${nomeItem[i]} - R$ ${precoItem[i]} - Estoque ${estoqueItem[i]} - ${raridades(precoItem[i])}`)
+    }
 
-  if (indice < 0 || indice >= catalogo.length) {
-    console.log('Item inválido.');
-    return;
-  }
+    const idCompra = Number(prompt(`\nID do item que deseja comprar: `))
+    let indice = -1
 
-  const removido = catalogo.splice(indice, 1)[0];
-  console.log(`Item removido: ${removido.nome}`);
+    for (i = 0; i < finalVetor; i++) {
+        if (id[i] === idCompra) {
+            indice = i
+        }
+    }
+
+    if (indice === -1) {
+        console.log(`Item não encontrado!`)
+    }
+    else if (estoqueItem[indice] <= 0) {
+        console.log(`Sem estoque!`)
+    }
+    else {
+        const quantidade = Number(prompt(`Quantidade: `))
+        const total = quantidade * precoItem[indice]
+        estoqueItem[indice] = estoqueItem[indice] - quantidade
+
+        console.log(`Compra realizada! Total: R$ ${total}`)
+    }
+
+    prompt(`ENTER para voltar: `)
 }
 
-// compra um item e desconta o estoque
-async function comprarItem() {
-  if (catalogo.length === 0) {
-    console.log('Não há itens cadastrados.');
-    return;
-  }
+function excluir() {
+    console.clear()
 
-  caixa(['ITENS DISPONÍVEIS', ...catalogo.map((item, i) => `${i + 1} - ${item.nome} (estoque: ${item.quantidadeEstoque})`)]);
+    const idExclusao = Number(prompt(`ID do item que deseja excluir: `))
 
-  const numero = Number(await perguntar('Número do item que deseja comprar: '));
-  const indice = numero - 1;
+    let i = 0
+    for (i = 0; i < finalVetor; i++) {
+        if (id[i] === idExclusao) {
+            delete nomeItem[i]
+            delete precoItem[i]
+            delete estoqueItem[i]
+            delete id[i]
+        }
+    }
 
-  if (indice < 0 || indice >= catalogo.length) {
-    console.log('Item inválido.');
-    return;
-  }
-
-  const item = catalogo[indice];
-
-  if (item.quantidadeEstoque <= 0) {
-    console.log('Item esgotado!');
-    return;
-  }
-
-  const quantidade = Number(await perguntar('Quantidade que deseja comprar: '));
-
-  if (quantidade <= 0) {
-    console.log('Erro: a quantidade precisa ser maior que 0.');
-    return;
-  }
-
-  if (quantidade > item.quantidadeEstoque) {
-    console.log(`Estoque insuficiente. Disponível: ${item.quantidadeEstoque} unidades.`);
-    return;
-  }
-
-  let restante = quantidade;
-  while (restante > 0) {
-    item.quantidadeEstoque--;
-    restante--;
-    console.log(`Estoque restante de ${item.nome}: ${item.quantidadeEstoque}`);
-  }
-
-  const total = quantidade * item.preco;
-  console.log(`Compra realizada com sucesso! Total: R$ ${total}`);
-
-  if (item.quantidadeEstoque === 0) {
-    console.log('Item esgotado!');
-  }
+    console.log(`Item excluído!`)
+    prompt(`ENTER para voltar: `)
 }
 
-main();
+function telaInicial() {
+    console.clear()
+    console.log(`+------------------------------+`)
+    console.log(`| LOJA |`)
+    console.log(`+------------------------------+`)
+    console.log(`| 1 - Comprar item |`)
+    console.log(`| 2 - Adicionar item |`)
+    console.log(`| 3 - Excluir item |`)
+    console.log(`| 4 - Sair |`)
+    console.log(`+------------------------------+`)
+}
+
+let opcao = 0
+
+while (opcao !== 4) {
+    telaInicial()
+    opcao = Number(prompt(`Opção: `))
+
+    if (opcao === 1) {
+        comprar()
+    }
+    else if (opcao === 2) {
+        registrar()
+    }
+    else if (opcao === 3) {
+        excluir()
+    }
+}
