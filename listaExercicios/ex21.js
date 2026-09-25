@@ -14,7 +14,7 @@ const missoes = [
       } else if (missao.pontos >= 200) {
         classificacao = "Missão Média";
       } else {
-        classificacao = "Missão Fácil";
+        classificacao = "Missão Fácil"; 
       }
   
       console.log(`${missao.nome} - ${classificacao}`);
