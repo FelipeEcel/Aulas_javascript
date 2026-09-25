@@ -8,3 +8,4 @@ export const formatarMoeda = valor => 'R$ ' + valor.toFixed(2).replace('.', ',')
 
 export function validarEmail(email) {
     return email.includes('@') && email.includes('.');
+}
